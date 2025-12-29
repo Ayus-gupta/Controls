@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Inner Choice</title>
+
+  <!-- Vue -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+  <!-- Space Galaxy CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+<div id="app" class="app">
+
+  <!-- NAVBAR -->
+  <nav class="navbar galaxy-panel">
+    <div class="nav-item">
+      🟢 Hero Face
+      <input type="file" @change="uploadFace($event, 'green')" />
+    </div>
+
+    <div class="nav-item">
+      🔴 Villain Face
+      <input type="file" @change="uploadFace($event, 'red')" />
+    </div>
+
+    <div class="nav-item">
+      <button @click="resetAll">🔄 Reset</button>
+    </div>
+  </nav>
+
+  <h1 class="galaxy-title">⚔️ Inner Choice Arena</h1>
+
+  <div class="arena">
+
+    <!-- GREEN -->
+    <div class="man green">
+      <div class="face">
+        <img v-if="greenFace" :src="greenFace" />
+        <div v-else class="default-face">
+          <div class="mouth"></div>
+        </div>
+      </div>
+      <div class="body" :style="{ transform: `scaleX(${greenScale})` }"></div>
+    </div>
+
+    <!-- RED -->
+    <div class="man red">
+      <div class="face">
+        <img v-if="redFace" :src="redFace" />
+        <div v-else class="default-face">
+          <div class="mouth"></div>
+        </div>
+      </div>
+      <div class="body" :style="{ transform: `scaleX(${redScale})` }"></div>
+    </div>
+
+  </div>
+
+  <!-- ACTION BAR -->
+  <div class="action-bar galaxy-panel">
+    <button class="action-btn green-btn" @click="worked">I Worked</button>
+    <button class="action-btn red-btn" @click="distracted">I Got Distracted</button>
+  </div>
+
+</div>
+
+<script>
+const { createApp } = Vue;
+
+createApp({
+  data() {
+    return {
+      greenPower: Number(localStorage.getItem('greenPower')) || 0,
+      redPower: Number(localStorage.getItem('redPower')) || 0,
+      greenFace: localStorage.getItem('greenFace'),
+      redFace: localStorage.getItem('redFace')
+    };
+  },
+
+  methods: {
+    worked() {
+      this.greenPower++;
+      this.redPower = Math.max(0, this.redPower - 1);
+      localStorage.setItem('greenPower', this.greenPower);
+      localStorage.setItem('redPower', this.redPower);
+    },
+    distracted() {
+      this.redPower++;
+      this.greenPower = Math.max(0, this.greenPower - 1);
+      localStorage.setItem('redPower', this.redPower);
+      localStorage.setItem('greenPower', this.greenPower);
+    },
+    uploadFace(e, type) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (type === 'green') {
+          this.greenFace = reader.result;
+          localStorage.setItem('greenFace', reader.result);
+        } else {
+          this.redFace = reader.result;
+          localStorage.setItem('redFace', reader.result);
+        }
+      };
+      reader.readAsDataURL(file);
+    },
+    resetAll() {
+      localStorage.clear();
+      this.greenPower = 0;
+      this.redPower = 0;
+      this.greenFace = null;
+      this.redFace = null;
+    }
+  },
+
+  computed: {
+    greenScale() {
+      return Math.min(1 + this.greenPower * 0.15, 9);
+    },
+    redScale() {
+      return Math.min(1 + this.redPower * 0.15, 9);
+    }
+  }
+}).mount('#app');
+</script>
+
+</body>
+</html>

@@ -1,0 +1,288 @@
+/* =========================
+   SPACE GALAXY THEME 🌌
+   60% Midnight Blue
+   30% Cosmic Purple
+   10% Star White / Glow
+========================= */
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: radial-gradient(circle at top, #1b1f3b, #05060f 70%);
+  color: #eaeaff;
+  overflow: hidden;
+}
+
+/* PANELS */
+.galaxy-panel {
+  background: rgba(60, 40, 120, 0.35);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 25px rgba(140, 100, 255, 0.15);
+}
+
+/* NAVBAR */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  z-index: 10;
+}
+
+.nav-item {
+  font-size: 14px;
+  color: #d6d6ff;
+  text-align: center;
+}
+
+.nav-item button {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #6a5acd, #8a2be2);
+  color: #fff;
+}
+
+/* TITLE */
+.galaxy-title {
+  margin-top: 90px;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-shadow: 0 0 12px rgba(180, 150, 255, 0.6);
+}
+
+/* ARENA */
+.arena {
+  position: relative;
+  width: 100vw;
+  height: calc(100vh - 160px);
+}
+
+/* CHARACTERS */
+.man {
+  position: absolute;
+  bottom: 0;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.green { left: 10%; }
+.red   { right: 10%; }
+
+/* BODY – KEEP COLORS */
+.body {
+  width: 100px;
+  height: 140px;
+  margin: auto;
+  border-radius: 20px;
+}
+
+.green .body { background: #2ecc71; }
+.red .body   { background: #e74c3c; }
+
+/* FACE */
+.face {
+  width: 80px;
+  height: 80px;
+  margin: auto;
+}
+
+.face img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* DEFAULT FACE */
+.default-face {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: 50%;
+}
+
+.default-face::before,
+.default-face::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #000;
+  border-radius: 50%;
+  top: 25px;
+}
+
+.default-face::before { left: 18px; }
+.default-face::after  { right: 18px; }
+
+.mouth {
+  position: absolute;
+  width: 30px;
+  height: 6px;
+  background: #000;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 3px;
+}
+
+/* ACTION BAR */
+.action-bar {
+  position: fixed;
+  bottom: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+}
+
+/* BUTTONS – PRESERVED */
+.action-btn {
+  padding: 12px 20px;
+  font-size: 15px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 0 20px rgba(255,255,255,0.15);
+}
+
+.green-btn {
+  background: #2ecc71;
+  color: #000;
+}
+
+.red-btn {
+  background: #e74c3c;
+  color: #000;
+}
+
+/* =========================
+   RESPONSIVE LAYOUT
+   Mobile • Tablet • Desktop
+========================= */
+
+/* ---------- MOBILE (max 600px) ---------- */
+@media (max-width: 600px) {
+
+  h1,
+  .galaxy-title {
+    font-size: 18px;
+    margin-top: 80px;
+  }
+
+  .navbar {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 8px;
+  }
+
+  .nav-item {
+    font-size: 12px;
+  }
+
+  .arena {
+    height: calc(100vh - 200px);
+  }
+
+  .man {
+    transform: scale(0.8);
+  }
+
+  .green {
+    left: 5%;
+  }
+
+  .red {
+    right: 5%;
+  }
+
+  .action-bar {
+    bottom: 10px;
+    gap: 10px;
+  }
+
+  .action-btn {
+    min-width: 120px;
+    font-size: 14px;
+    padding: 10px 14px;
+  }
+}
+
+
+/* ---------- TABLET (601px – 1024px) ---------- */
+@media (min-width: 601px) and (max-width: 1024px) {
+
+  h1,
+  .galaxy-title {
+    font-size: 22px;
+  }
+
+  .navbar {
+    gap: 20px;
+  }
+
+  .man {
+    transform: scale(0.9);
+  }
+
+  .green {
+    left: 8%;
+  }
+
+  .red {
+    right: 8%;
+  }
+
+  .action-btn {
+    min-width: 130px;
+    font-size: 15px;
+  }
+}
+
+
+/* ---------- DESKTOP & macOS (1025px+) ---------- */
+@media (min-width: 1025px) {
+
+  h1,
+  .galaxy-title {
+    font-size: 26px;
+  }
+
+  .navbar {
+    gap: 30px;
+  }
+
+  .man {
+    transform: scale(1);
+  }
+
+  .green {
+    left: 10%;
+  }
+
+  .red {
+    right: 10%;
+  }
+
+  .action-btn {
+    min-width: 140px;
+    font-size: 16px;
+  }
+}
+
+
+/* ---------- macOS / Retina Polish ---------- */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  body {
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+}
+
