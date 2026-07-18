@@ -1,69 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Inner Choice</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Inner Choice — You vs Distraction</title>
 
-  <!-- Vue -->
-  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<!-- Vue -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
-  <!-- Space Galaxy CSS -->
-  <link rel="stylesheet" href="style.css" />
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
 <div id="app" class="app">
 
   <!-- NAVBAR -->
   <nav class="navbar galaxy-panel">
-    <div class="nav-item">
-      🟢 Hero Face
-      <input type="file" @change="uploadFace($event, 'green')" />
+    <div class="brand">
+      <span class="brand-mark">⚔️</span>
+      <span class="brand-name">Inner&nbsp;Choice</span>
     </div>
 
-    <div class="nav-item">
-      🔴 Villain Face
-      <input type="file" @change="uploadFace($event, 'red')" />
-    </div>
+    <div class="nav-controls">
+      <label class="nav-item face-upload hero-tint">
+        <span class="nav-item-icon">🟢</span>
+        <span class="nav-item-label">Hero face</span>
+        <input type="file" accept="image/*" @change="uploadFace($event, 'green')" />
+      </label>
 
-    <div class="nav-item">
-      <button @click="resetAll">🔄 Reset</button>
+      <label class="nav-item face-upload villain-tint">
+        <span class="nav-item-icon">🔴</span>
+        <span class="nav-item-label">Villain face</span>
+        <input type="file" accept="image/*" @change="uploadFace($event, 'red')" />
+      </label>
+
+      <button class="nav-item reset-btn" @click="askReset" title="Clear all data">
+        <span class="nav-item-icon">↺</span>
+        <span class="nav-item-label">Reset</span>
+      </button>
     </div>
   </nav>
 
-  <h1 class="galaxy-title">⚔️ Inner Choice Arena</h1>
+  <!-- HEADER -->
+  <header class="hero-header">
+    <h1 class="galaxy-title">Who controlled you today?</h1>
+    <p class="mirror-line" :class="dominantSide">{{ mirrorQuote }}</p>
+  </header>
 
+  <!-- DOMINANCE METER (signature element) -->
+  <div class="meter-wrap galaxy-panel">
+    <div class="meter-labels">
+      <span class="meter-label hero-text">Man 1 · {{ greenPercent }}%</span>
+      <span class="meter-label villain-text">Man 2 · {{ redPercent }}%</span>
+    </div>
+    <div class="meter-track">
+      <div class="meter-fill hero-fill" :style="{ width: greenPercent + '%' }"></div>
+      <div class="meter-fill villain-fill" :style="{ width: redPercent + '%' }"></div>
+      <div class="meter-pointer" :style="{ left: greenPercent + '%' }">
+        <span class="meter-pointer-dot"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARENA -->
   <div class="arena">
 
     <!-- GREEN -->
-    <div class="man green">
+    <div class="man green" :class="{ leading: greenPower > redPower }">
+      <div class="man-label">🟢 Man 1 — The Builder</div>
       <div class="face">
-        <img v-if="greenFace" :src="greenFace" />
-        <div v-else class="default-face">
+        <img v-if="greenFace" :src="greenFace" alt="Hero face" />
+        <div v-else class="default-face" :class="faceMood('green')">
+          <div class="eyes"><span class="eye"></span><span class="eye"></span></div>
           <div class="mouth"></div>
         </div>
       </div>
       <div class="body" :style="{ transform: `scaleX(${greenScale})` }"></div>
+      <div class="power-count">{{ greenPower }}</div>
+      <div class="streak-badge" v-if="streak.side === 'green' && streak.count > 1">
+        🔥 {{ streak.count }} in a row
+      </div>
     </div>
 
+    <div class="vs-divider">VS</div>
+
     <!-- RED -->
-    <div class="man red">
+    <div class="man red" :class="{ leading: redPower > greenPower }">
+      <div class="man-label">🔴 Man 2 — The Comfort Seeker</div>
       <div class="face">
-        <img v-if="redFace" :src="redFace" />
-        <div v-else class="default-face">
+        <img v-if="redFace" :src="redFace" alt="Villain face" />
+        <div v-else class="default-face" :class="faceMood('red')">
+          <div class="eyes"><span class="eye"></span><span class="eye"></span></div>
           <div class="mouth"></div>
         </div>
       </div>
       <div class="body" :style="{ transform: `scaleX(${redScale})` }"></div>
+      <div class="power-count">{{ redPower }}</div>
+      <div class="streak-badge" v-if="streak.side === 'red' && streak.count > 1">
+        🔥 {{ streak.count }} in a row
+      </div>
     </div>
-
   </div>
 
   <!-- ACTION BAR -->
   <div class="action-bar galaxy-panel">
-    <button class="action-btn green-btn" @click="worked">I Worked</button>
-    <button class="action-btn red-btn" @click="distracted">I Got Distracted</button>
+    <button class="action-btn green-btn" @click="worked">
+      <span>I Worked</span>
+      <kbd>W</kbd>
+    </button>
+    <button class="action-btn red-btn" @click="distracted">
+      <span>I Got Distracted</span>
+      <kbd>D</kbd>
+    </button>
   </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card galaxy-panel">
+      <div class="stat-value hero-text">{{ todayWorked }}</div>
+      <div class="stat-label">Worked today</div>
+    </div>
+    <div class="stat-card galaxy-panel">
+      <div class="stat-value villain-text">{{ todayDistracted }}</div>
+      <div class="stat-label">Distracted today</div>
+    </div>
+    <div class="stat-card galaxy-panel">
+      <div class="stat-value">{{ totalActions }}</div>
+      <div class="stat-label">Choices logged</div>
+    </div>
+    <div class="stat-card galaxy-panel">
+      <div class="stat-value" :class="dominantSide === 'green' ? 'hero-text' : dominantSide === 'red' ? 'villain-text' : ''">
+        {{ overallLeaderLabel }}
+      </div>
+      <div class="stat-label">Overall leader</div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY LOG -->
+  <div class="log-panel galaxy-panel">
+    <button class="log-toggle" @click="logOpen = !logOpen">
+      <span>Honest record</span>
+      <span class="log-chevron" :class="{ open: logOpen }">▾</span>
+    </button>
+    <transition name="log-fade">
+      <div v-if="logOpen" class="log-list">
+        <div v-if="log.length === 0" class="log-empty">Nothing logged yet. Your next choice starts the record.</div>
+        <div v-for="entry in recentLog" :key="entry.ts" class="log-entry" :class="entry.type">
+          <span class="log-icon">{{ entry.type === 'worked' ? '🟢' : '🔴' }}</span>
+          <span class="log-text">{{ entry.type === 'worked' ? 'Chose to work' : 'Chose distraction' }}</span>
+          <span class="log-time">{{ formatTime(entry.ts) }}</span>
+        </div>
+      </div>
+    </transition>
+  </div>
+
+  <!-- MILESTONE TOAST -->
+  <transition name="toast-fade">
+    <div v-if="toast" class="toast" :class="toast.side">{{ toast.message }}</div>
+  </transition>
+
+  <!-- RESET CONFIRM MODAL -->
+  <transition name="modal-fade">
+    <div v-if="resetConfirmOpen" class="modal-backdrop" @click.self="resetConfirmOpen = false">
+      <div class="modal galaxy-panel">
+        <h3>Reset everything?</h3>
+        <p>This clears both power levels, faces, and your entire honest record. There's no undo.</p>
+        <div class="modal-actions">
+          <button class="modal-btn cancel" @click="resetConfirmOpen = false">Cancel</button>
+          <button class="modal-btn confirm" @click="resetAll">Yes, reset</button>
+        </div>
+      </div>
+    </div>
+  </transition>
 
 </div>
 
@@ -76,22 +188,50 @@ createApp({
       greenPower: Number(localStorage.getItem('greenPower')) || 0,
       redPower: Number(localStorage.getItem('redPower')) || 0,
       greenFace: localStorage.getItem('greenFace'),
-      redFace: localStorage.getItem('redFace')
+      redFace: localStorage.getItem('redFace'),
+      log: JSON.parse(localStorage.getItem('choiceLog') || '[]'),
+      logOpen: false,
+      resetConfirmOpen: false,
+      toast: null,
+      toastTimer: null
     };
   },
-
   methods: {
     worked() {
       this.greenPower++;
       this.redPower = Math.max(0, this.redPower - 1);
-      localStorage.setItem('greenPower', this.greenPower);
-      localStorage.setItem('redPower', this.redPower);
+      this.persistPower();
+      this.pushLog('worked');
+      this.maybeMilestone('green', this.greenPower);
     },
     distracted() {
       this.redPower++;
       this.greenPower = Math.max(0, this.greenPower - 1);
-      localStorage.setItem('redPower', this.redPower);
+      this.persistPower();
+      this.pushLog('distracted');
+      this.maybeMilestone('red', this.redPower);
+    },
+    persistPower() {
       localStorage.setItem('greenPower', this.greenPower);
+      localStorage.setItem('redPower', this.redPower);
+    },
+    pushLog(type) {
+      this.log.push({ type, ts: Date.now() });
+      if (this.log.length > 200) this.log = this.log.slice(-200);
+      localStorage.setItem('choiceLog', JSON.stringify(this.log));
+    },
+    maybeMilestone(side, count) {
+      if (count > 0 && count % 5 === 0) {
+        const msg = side === 'green'
+          ? `Man 1 has grown to ${count}. The builder is winning.`
+          : `Man 2 has grown to ${count}. Distraction is winning.`;
+        this.showToast(msg, side);
+      }
+    },
+    showToast(message, side) {
+      this.toast = { message, side };
+      if (this.toastTimer) clearTimeout(this.toastTimer);
+      this.toastTimer = setTimeout(() => { this.toast = null; }, 3800);
     },
     uploadFace(e, type) {
       const file = e.target.files[0];
@@ -108,25 +248,101 @@ createApp({
       };
       reader.readAsDataURL(file);
     },
+    askReset() {
+      this.resetConfirmOpen = true;
+    },
     resetAll() {
       localStorage.clear();
       this.greenPower = 0;
       this.redPower = 0;
       this.greenFace = null;
       this.redFace = null;
+      this.log = [];
+      this.resetConfirmOpen = false;
+    },
+    formatTime(ts) {
+      const d = new Date(ts);
+      const now = new Date();
+      const sameDay = d.toDateString() === now.toDateString();
+      const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return sameDay ? time : `${d.toLocaleDateString([], { month: 'short', day: 'numeric' })}, ${time}`;
+    },
+    faceMood(side) {
+      const leading = side === 'green' ? this.greenPower > this.redPower : this.redPower > this.greenPower;
+      return leading ? 'mood-up' : 'mood-flat';
+    },
+    handleKeydown(e) {
+      const tag = (e.target.tagName || '').toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return;
+      if (e.key.toLowerCase() === 'w') this.worked();
+      if (e.key.toLowerCase() === 'd') this.distracted();
     }
   },
-
   computed: {
     greenScale() {
       return Math.min(1 + this.greenPower * 0.15, 9);
     },
     redScale() {
       return Math.min(1 + this.redPower * 0.15, 9);
+    },
+    totalActions() {
+      return this.log.length;
+    },
+    greenPercent() {
+      const total = this.greenPower + this.redPower;
+      if (total === 0) return 50;
+      return Math.round((this.greenPower / total) * 100);
+    },
+    redPercent() {
+      return 100 - this.greenPercent;
+    },
+    dominantSide() {
+      if (this.greenPower === this.redPower) return 'tie';
+      return this.greenPower > this.redPower ? 'green' : 'red';
+    },
+    overallLeaderLabel() {
+      if (this.greenPower === this.redPower) return 'Even';
+      return this.greenPower > this.redPower ? 'Man 1' : 'Man 2';
+    },
+    mirrorQuote() {
+      const diff = this.greenPower - this.redPower;
+      if (this.totalActions === 0) return 'Every action you log here already happened. You don\u2019t plan \u2014 you accept.';
+      if (diff >= 5) return 'Man 1 is clearly running the show right now.';
+      if (diff > 0) return 'Man 1 is slightly ahead. Keep choosing.';
+      if (diff === 0) return 'It\u2019s a dead heat. The next choice decides who leads.';
+      if (diff > -5) return 'Man 2 is slightly ahead. Notice that.';
+      return 'Man 2 is clearly running the show right now.';
+    },
+    streak() {
+      if (this.log.length === 0) return { side: null, count: 0 };
+      let count = 1;
+      const lastType = this.log[this.log.length - 1].type;
+      for (let i = this.log.length - 2; i >= 0; i--) {
+        if (this.log[i].type === lastType) count++;
+        else break;
+      }
+      return { side: lastType === 'worked' ? 'green' : 'red', count };
+    },
+    todayWorked() {
+      return this.log.filter(e => this.isToday(e.ts) && e.type === 'worked').length;
+    },
+    todayDistracted() {
+      return this.log.filter(e => this.isToday(e.ts) && e.type === 'distracted').length;
+    },
+    recentLog() {
+      return this.log.slice(-25).reverse();
     }
+  },
+  mounted() {
+    window.addEventListener('keydown', this.handleKeydown);
+  },
+  beforeUnmount() {
+    window.removeEventListener('keydown', this.handleKeydown);
+  },
+  created() {
+    this.isToday = (ts) => new Date(ts).toDateString() === new Date().toDateString();
   }
 }).mount('#app');
 </script>
-
 </body>
 </html>
